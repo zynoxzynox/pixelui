@@ -3,10 +3,17 @@
 > 暗い kurai (pronounced "koo-rye") is a sleek ui library focused on simplicity, modern design, and csgo inspired aesthetics.  
 > dropdowns, inputs, keybinds and more added later.
 
+## example 暗い
+```lua
+loadstring(
+    game:HttpGetAsync 'https://raw.githubusercontent.com/focat69/kurai/refs/heads/main/example.lua'
+)()
+```
+
 ## installation 暗い
 ```lua
 local lib = loadstring(
-    game:HttpGetAsync(`https://raw.githubusercontent.com/focat69/kurai/refs/heads/main/source?t={tostring(tick())}`)
+    game:HttpGetAsync `https://raw.githubusercontent.com/focat69/kurai/refs/heads/main/source?t={tostring(tick())}`
 )()
 ```
 
