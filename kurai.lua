@@ -1,0 +1,980 @@
+--[[
+暗い kurai.
+a sleek roblox ui library based around simplicity, modern design, and csgo inspired aesthetics.
+
+created by @focat on discord - dm me before using any code from this commercially
+licensed under Creative Commons Zero v.10 Universal (CC0 1.0) Public Domain Dedication
+    > states that you may share/modify this code as you please, but NOT commercially
+    > you also must give credit where it is due!
+
+enjoy!
+sorry for messy code :(
+]]--
+
+local Kurai_Lib = {}
+Kurai_Lib.__index = Kurai_Lib
+
+local TweenService = game:GetService("TweenService") -- ts pmo!!!!!!!!!
+local UserInputService = game:GetService("UserInputService")
+
+Kurai_Lib.Settings = {
+    ToggleKey = Enum.KeyCode.RightControl,
+}
+Kurai_Lib.Flags = {}
+Kurai_Lib.Theme = {
+    Main = Color3.fromRGB(20, 20, 20),
+    
+    Tab = Color3.fromRGB(23, 23, 23),
+    TabAccent = Color3.fromRGB(30, 30, 30),
+
+    Content = Color3.fromRGB(25, 25, 25),
+    Accent = Color3.fromRGB(253, 181, 181),
+    
+    Text = Color3.fromRGB(212, 212, 212),
+    SubText = Color3.fromRGB(89, 89, 89)
+}
+
+function Kurai_Lib.Tween(obj, goal, time, style, direction)
+    local tween = TweenService:Create(obj, TweenInfo.new(time or 0.5, style or Enum.EasingStyle.Quint, direction or Enum.EasingDirection.Out), goal)
+    tween:Play()
+    return tween
+end
+
+function Kurai_Lib.RippleEffect(button, color)
+    local ripple = Instance.new("Frame")
+    ripple.Name = "Ripple"
+    ripple.BackgroundColor3 = color or Kurai_Lib.Theme.Accent
+    ripple.BackgroundTransparency = 0.8
+    ripple.Size = UDim2.new(0, 0, 0, 0)
+    ripple.ZIndex = 10
+    ripple.Parent = button
+    
+    local corner = Instance.new("UICorner")
+    corner.CornerRadius = UDim.new(1, 0)
+    corner.Parent = ripple
+    
+    local mouse = UserInputService:GetMouseLocation()
+    local buttonPos = button.AbsolutePosition
+    local relativeX = mouse.X - buttonPos.X
+    local relativeY = mouse.Y - buttonPos.Y
+    
+    ripple.Position = UDim2.new(0, relativeX, 0, relativeY)
+    ripple.AnchorPoint = Vector2.new(0.5, 0.5)
+    
+    local targetSize = math.max(button.AbsoluteSize.X, button.AbsoluteSize.Y) * 2.5
+    
+    Kurai_Lib.Tween(ripple, {
+        Size = UDim2.new(0, targetSize, 0, targetSize),
+        Position = UDim2.new(0, relativeX, 0, relativeY),
+        BackgroundTransparency = 1
+    }, 0.5)
+    
+    game:GetService("Debris"):AddItem(ripple, 0.6)
+end
+
+function Kurai_Lib.new(options)
+    options = options or {}
+    local self = setmetatable({}, Kurai_Lib)
+    
+    self.ScreenGui = Instance.new("ScreenGui")
+    self.ScreenGui.Name = options.Name or "Kurai_Lib"
+    self.ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Global
+    self.ScreenGui.ResetOnSpawn = false
+    self.ScreenGui.DisplayOrder = 1000
+    self.ScreenGui.Parent = gethui and gethui() or game:GetService("CoreGui")
+    
+    self.Notifications = {}
+    self.Open = true
+    
+    self:_internal_createloader(options)
+    return self
+end
+
+function Kurai_Lib:ToggleUI()
+    self.Open = not self.Open
+    
+    if self.Open then
+        self.MainWindow.Visible = true
+        self.MainWindow.BackgroundTransparency = 1
+
+        local startPos = UDim2.new(
+            self.MainWindow.Position.X.Scale, 
+            self.MainWindow.Position.X.Offset,
+            1, 500
+        )
+        local targetPos = UDim2.new(
+            0.5, -self.MainWindow.AbsoluteSize.X/2,
+            0.5, -self.MainWindow.AbsoluteSize.Y/2
+        )
+        self.MainWindow.Position = startPos
+        
+        Kurai_Lib.Tween(self.MainWindow, {
+            Position = targetPos,
+            BackgroundTransparency = 0
+        })
+        
+        -- for _, child in next, self.MainWindow:GetDescendants() do
+        --     if child:IsA("GuiObject") then
+        --         Kurai_Lib.Tween(child, {BackgroundTransparency = child:GetAttribute("OriginalTransparency") or 0})
+        --         if child:IsA("TextLabel") or child:IsA("TextButton") then
+        --             Kurai_Lib.Tween(child, {TextTransparency = 0})
+        --         end
+        --     end
+        -- end
+    else
+        local currentPos = self.MainWindow.Position
+        
+        -- for _, child in next, self.MainWindow:GetDescendants() do
+        --     if child:IsA("GuiObject") then
+        --         child:SetAttribute("OriginalTransparency", child.BackgroundTransparency)
+        --         Kurai_Lib.Tween(child, {BackgroundTransparency = 1})
+        --         if child:IsA("TextLabel") or child:IsA("TextButton") then
+        --             Kurai_Lib.Tween(child, {TextTransparency = 1})
+        --         end
+        --     end
+        -- end
+        
+        local targetPos = UDim2.new(
+            currentPos.X.Scale, 
+            currentPos.X.Offset,
+            1, 500
+        )
+        
+        Kurai_Lib.Tween(self.MainWindow, {
+            Position = targetPos,
+            BackgroundTransparency = 1
+        }):Wait()
+        self.MainWindow.Visible = false
+    end
+end
+
+function Kurai_Lib:Notify(title, message, duration, notificationType)
+    duration = duration or 5
+    notificationType = notificationType or "info"
+
+    -- print("[Kurai] Creating notification")
+    -- print("Title:", title)
+    -- print("Message:", message)
+    -- print("ScreenGui exists?", self.ScreenGui ~= nil)
+    
+    -- if not self.ScreenGui then
+    --     warn("[Kurai] ScreenGui is nil! Cannot create notification")
+    --     return nil
+    -- end
+
+    local notification = Instance.new("Frame")
+    notification.Name = "Notification"
+    notification.Size = UDim2.new(0, 300, 0, 0)
+    notification.Position = UDim2.new(1, -10, 1, 10) -- start below screen
+    notification.AnchorPoint = Vector2.new(1, 1)
+    notification.BackgroundColor3 = Kurai_Lib.Theme.Content
+    notification.BorderSizePixel = 0
+    notification.ClipsDescendants = true
+    notification.ZIndex = self.ScreenGui.DisplayOrder + 1
+    notification.Parent = self.ScreenGui
+    
+    local corner = Instance.new("UICorner")
+    corner.CornerRadius = UDim.new(0, 4)
+    corner.Parent = notification
+
+    local accentColor = Kurai_Lib.Theme.Accent
+    if notificationType == "success" then
+        accentColor = Color3.fromRGB(76, 175, 80)
+    elseif notificationType == "warn" then
+        accentColor = Color3.fromRGB(255, 193, 7)
+    elseif notificationType == "err" then
+        accentColor = Color3.fromRGB(244, 67, 54)
+    end
+
+    local accentBar = Instance.new("Frame")
+    accentBar.Name = "AccentBar"
+    accentBar.Size = UDim2.new(0, 3, 1, 0)
+    accentBar.BackgroundColor3 = accentColor
+    accentBar.BorderSizePixel = 0
+    accentBar.ZIndex = notification.ZIndex + 1
+    accentBar.Parent = notification
+
+    local accentBarCorner = Instance.new("UICorner")
+    accentBarCorner.CornerRadius = UDim.new(0, 4)
+    accentBarCorner.Parent = accentBar
+
+    local padding = Instance.new("UIPadding")
+    padding.PaddingLeft = UDim.new(0, 0) -- 0 for accent bar
+    padding.PaddingRight = UDim.new(0, 10)
+    padding.PaddingTop = UDim.new(0, 10)
+    padding.PaddingBottom = UDim.new(0, 10)
+    padding.Parent = notification
+
+    local titleLabel = Instance.new("TextLabel")
+    titleLabel.Name = "Title"
+    titleLabel.Size = UDim2.new(1, -25, 0, 20)
+    titleLabel.Position = UDim2.new(0, 15, 0, 0)
+    titleLabel.BackgroundTransparency = 1
+    titleLabel.Text = title
+    titleLabel.TextColor3 = Kurai_Lib.Theme.Text
+    titleLabel.TextSize = 16
+    titleLabel.Font = Enum.Font.RobotoMono
+    titleLabel.TextXAlignment = Enum.TextXAlignment.Left
+    titleLabel.ZIndex = accentBar.ZIndex
+    titleLabel.Parent = notification
+
+    local messageLabel = Instance.new("TextLabel")
+    messageLabel.Name = "Message"
+    messageLabel.Size = UDim2.new(1, -25, 0, 0)
+    messageLabel.Position = UDim2.new(0, 15, 0, 25)
+    messageLabel.BackgroundTransparency = 1
+    messageLabel.Text = message
+    messageLabel.TextColor3 = Kurai_Lib.Theme.SubText
+    messageLabel.TextSize = 14
+    messageLabel.Font = Enum.Font.RobotoMono
+    messageLabel.TextXAlignment = Enum.TextXAlignment.Left
+    messageLabel.TextYAlignment = Enum.TextYAlignment.Top
+    messageLabel.TextWrapped = true
+    messageLabel.ZIndex = accentBar.ZIndex
+    messageLabel.Parent = notification
+
+    local textService = game:GetService("TextService")
+    local textSize = textService:GetTextSize(
+        message,
+        14,
+        Enum.Font.RobotoMono,
+        Vector2.new(265, math.huge)
+    )
+    
+    messageLabel.Size = UDim2.new(1, -25, 0, textSize.Y)
+    notification.Size = UDim2.new(0, 300, 0, textSize.Y + 45)
+
+    Kurai_Lib.Tween(notification, {
+        Position = UDim2.new(1, -10, 1, -10)
+    }, 0.3)
+
+    local totalHeight = notification.AbsoluteSize.Y + 10
+    for _, existingNotif in next, self.Notifications do
+        if existingNotif and existingNotif.Parent then
+            local currentPos = existingNotif.Position
+            Kurai_Lib.Tween(existingNotif, {
+                Position = UDim2.new(
+                    currentPos.X.Scale, currentPos.X.Offset,
+                    currentPos.Y.Scale, currentPos.Y.Offset - totalHeight
+                )
+            }, 0.3)
+        end
+    end
+
+    table.insert(self.Notifications, notification)
+    task.spawn(function()
+        task.wait(duration)
+        
+        Kurai_Lib.Tween(notification, {
+            BackgroundTransparency = 1
+        }, 0.3)
+        
+        Kurai_Lib.Tween(titleLabel, {
+            TextTransparency = 1
+        }, 0.3)
+        
+        Kurai_Lib.Tween(messageLabel, {
+            TextTransparency = 1
+        }, 0.3)
+        
+        Kurai_Lib.Tween(accentBar, {
+            BackgroundTransparency = 1
+        }, 0.3)
+        
+        task.wait(0.3)
+        
+        for i, notif in next, self.Notifications do
+            if notif == notification then
+                table.remove(self.Notifications, i)
+                break
+            end
+        end
+        
+        for _, remainingNotif in next, self.Notifications do
+            if remainingNotif and remainingNotif.Parent then
+                local currentPos = remainingNotif.Position
+                Kurai_Lib.Tween(remainingNotif, {
+                    Position = UDim2.new(
+                        currentPos.X.Scale, currentPos.X.Offset,
+                        currentPos.Y.Scale, currentPos.Y.Offset + totalHeight
+                    )
+                }, 0.3)
+            end
+        end
+        
+        notification:Destroy()
+    end)
+    
+    return notification
+end
+
+function Kurai_Lib:_internal_createloader(options)
+    self.Loader = Instance.new("Frame")
+    self.Loader.Name = "Loader"
+    self.Loader.BackgroundColor3 = Kurai_Lib.Theme.Main
+    self.Loader.BorderSizePixel = 0
+    self.Loader.Position = UDim2.new(0.5, -150, 0.5, -150)
+    self.Loader.Size = UDim2.new(0, 300, 0, 300)
+    self.Loader.Visible = false
+    self.Loader.Parent = self.ScreenGui
+    
+    -- [ Loader elements (status bar, text, etc) ]
+    self.LoaderBar = Instance.new("Frame")
+    self.LoaderBar.Name = "LoaderBar"
+    self.LoaderBar.BackgroundColor3 = Kurai_Lib.Theme.Accent
+    self.LoaderBar.BorderSizePixel = 0
+    self.LoaderBar.Size = UDim2.new(0, 300, 0, 1)
+    self.LoaderBar.Parent = self.Loader
+    -- [ gay rainbow ]
+    Kurai_Lib.Rainbow(self.LoaderBar, 0.5)
+    
+    self.StatusText = Instance.new("TextLabel")
+    self.StatusText.Name = "StatusText"
+    self.StatusText.Font = Enum.Font.RobotoMono
+    self.StatusText.Text = "initializing..."
+    self.StatusText.TextColor3 = Kurai_Lib.Theme.SubText
+    self.StatusText.TextSize = 14
+    self.StatusText.BackgroundTransparency = 1
+    self.StatusText.Position = UDim2.new(0.5, -150, 0.1, 0)
+    self.StatusText.Size = UDim2.new(0, 300, 0, 21)
+    self.StatusText.Parent = self.Loader
+
+    self.LoaderLogo = Instance.new("ImageLabel")
+    self.LoaderLogo.Image = "rbxassetid://108502703403650"
+    self.LoaderLogo.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+    self.LoaderLogo.BackgroundTransparency = 1
+    self.LoaderLogo.BorderColor3 = Color3.fromRGB(0, 0, 0)
+    self.LoaderLogo.BorderSizePixel = 0
+    self.LoaderLogo.Position = UDim2.new(0.416666657, -100, 0.416666657, -100)
+    self.LoaderLogo.Size = UDim2.new(0, 250, 0, 250)
+    self.LoaderLogo.Parent = self.Loader
+
+    self.LoaderCredits = Instance.new("TextLabel")
+    self.LoaderCredits.Font = Enum.Font.RobotoMono
+    self.LoaderCredits.Text = "暗い - kurai."
+    self.LoaderCredits.TextColor3 = Color3.fromRGB(89.00000229477882, 89.00000229477882, 89.00000229477882)
+    self.LoaderCredits.TextSize = 12
+    self.LoaderCredits.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+    self.LoaderCredits.BackgroundTransparency = 1
+    self.LoaderCredits.BorderColor3 = Color3.fromRGB(0, 0, 0)
+    self.LoaderCredits.BorderSizePixel = 0
+    self.LoaderCredits.Position = UDim2.new(0.5, -150, 0.906666696, 0)
+    self.LoaderCredits.Size = UDim2.new(0, 300, 0, 21)
+    self.LoaderCredits.Name = "credits"
+    self.LoaderCredits.Parent = self.Loader
+    
+    self:_internal_initload(options)
+end
+
+function Kurai_Lib:_internal_initload(options)
+    self.Loader.Visible = true
+    Kurai_Lib.Tween(self.Loader, {BackgroundTransparency = 0})
+    
+    -- ts pmo (doesnt do anything related to version checking YET...)
+    self:_internal_setloaderstatus("fetching version...")
+    task.wait(0.5)
+    
+    self:_internal_setloaderstatus("comparing local <-> remote...")
+    task.wait(1)
+    
+    self:_internal_setloaderstatus("remote == local")
+    task.wait(1)
+    
+    self:_internal_setloaderstatus("loading components...")
+    task.wait(2)
+    
+    self:_internal_setloaderstatus("initializing UI...")
+    task.wait(1)
+    
+    self:_internal_createmainwindow(options)
+    
+    Kurai_Lib.Tween(self.Loader, {BackgroundTransparency = 1})
+    -- [ fade out all text, images, frames ]
+    for _, child in next, self.Loader:GetDescendants() do
+        if child:IsA("GuiObject") then
+            Kurai_Lib.Tween(child, {BackgroundTransparency = 1})
+            if child:IsA("TextLabel") or child:IsA("TextButton") then
+                Kurai_Lib.Tween(child, {TextTransparency = 1})
+            end
+            if child:IsA("ImageLabel") or child:IsA("ImageButton") then
+                Kurai_Lib.Tween(child, {ImageTransparency = 1})
+            end
+        end
+    end
+
+    task.wait(0.5)
+    self.Loader.Visible = false
+end
+
+function Kurai_Lib:_internal_setloaderstatus(text)
+    self.StatusText.Text = text
+end
+
+function Kurai_Lib:_internal_createmainwindow(options)
+    self.MainWindow = Instance.new("Frame")
+    self.MainWindow.Name = "MainWindow"
+    self.MainWindow.Size = UDim2.new(0, 500, 0, 500)
+    self.MainWindow.Position = UDim2.new(0.5, -250, 0.5, -250)
+    self.MainWindow.AnchorPoint = Vector2.new(0.5, 0.5)
+    self.MainWindow.BackgroundColor3 = Kurai_Lib.Theme.Main
+    self.MainWindow.BorderSizePixel = 0
+    self.MainWindow.ClipsDescendants = true
+    self.MainWindow.Parent = self.ScreenGui
+    
+    self.TitleBar = Instance.new("Frame")
+    self.TitleBar.Name = "TitleBar"
+    self.TitleBar.Size = UDim2.new(1, 0, 0, 53)
+    self.TitleBar.BackgroundTransparency = 1
+    self.TitleBar.Parent = self.MainWindow
+    
+    self.TitleAccent = Instance.new("Frame")
+    self.TitleAccent.Name = "TitleAccent"
+    self.TitleAccent.BackgroundColor3 = Kurai_Lib.Theme.Accent
+    self.TitleAccent.BorderSizePixel = 0
+    self.TitleAccent.Size = UDim2.new(1, 0, 0, 1)
+    self.TitleAccent.Parent = self.TitleBar
+    
+    self.GameTitle = Instance.new("TextLabel")
+    self.GameTitle.Name = "GameTitle"
+    self.GameTitle.Font = Enum.Font.RobotoMono
+    self.GameTitle.Text = options.GameName or "[GAME NAME]"
+    self.GameTitle.TextColor3 = Kurai_Lib.Theme.Text
+    self.GameTitle.TextSize = 18
+    self.GameTitle.TextXAlignment = Enum.TextXAlignment.Left
+    self.GameTitle.BackgroundTransparency = 1
+    self.GameTitle.Position = UDim2.new(0.43, -150, 0.44, -9)
+    self.GameTitle.Size = UDim2.new(0, 300, 0, 18)
+    self.GameTitle.Parent = self.TitleBar
+
+    self.LogoIcon = Instance.new("ImageLabel")
+    self.LogoIcon.Image = "rbxassetid://108502703403650"
+    self.LogoIcon.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+    self.LogoIcon.BackgroundTransparency = 1
+    self.LogoIcon.BorderColor3 = Color3.fromRGB(0, 0, 0)
+    self.LogoIcon.BorderSizePixel = 0
+    self.LogoIcon.Position = UDim2.new(0.0659999996, -25, 0.613207519, -25)
+    self.LogoIcon.Size = UDim2.new(0, 50, 0, 50)
+    self.LogoIcon.Name = "icon"
+    self.LogoIcon.Parent = self.TitleBar
+    
+    self.ScriptHubName = Instance.new("TextLabel")
+    self.ScriptHubName.Name = "ScriptHubName"
+    self.ScriptHubName.Font = Enum.Font.RobotoMono
+    self.ScriptHubName.Text = options.ScriptHubName or "JEWISH SCRIPT HUB"
+    self.ScriptHubName.TextColor3 = Kurai_Lib.Theme.SubText
+    self.ScriptHubName.TextSize = 18
+    self.ScriptHubName.TextXAlignment = Enum.TextXAlignment.Left
+    self.ScriptHubName.BackgroundTransparency = 1
+    self.ScriptHubName.Position = UDim2.new(0.43, -150, 0.78, -9)
+    self.ScriptHubName.Size = UDim2.new(0, 300, 0, 18)
+    self.ScriptHubName.Parent = self.TitleBar
+    
+    self.TabContainer = Instance.new("Frame")
+    self.TabContainer.Name = "TabContainer"
+    self.TabContainer.Size = UDim2.new(1, 0, 0, 35)
+    self.TabContainer.Position = UDim2.new(0, 0, 0.12, 0)
+    self.TabContainer.BackgroundTransparency = 1
+    self.TabContainer.BorderSizePixel = 0
+    self.TabContainer.Parent = self.MainWindow
+    
+    self.ContentContainer = Instance.new("Frame")
+    self.ContentContainer.Name = "ContentContainer"
+    self.ContentContainer.Size = UDim2.new(1, -20, 1, -100)
+    self.ContentContainer.Position = UDim2.new(0, 10, 0, 95)
+    self.ContentContainer.BackgroundTransparency = 1
+    self.ContentContainer.BorderSizePixel = 0
+    self.ContentContainer.Parent = self.MainWindow
+    
+    self:CreateTabs(options.Tabs or {"Main", "Visuals", "Settings"})
+
+    -- [ toggle key ]
+    UserInputService.InputBegan:Connect(function(input, gpe)
+        -- print("Pressed:", input.KeyCode)
+        -- print("Settings Keybind:", Kurai_Lib.Settings.ToggleKey)
+        if not gpe and input.KeyCode == Kurai_Lib.Settings.ToggleKey then
+            self:ToggleUI()
+        end
+    end)
+
+    -- [ make draggable ]
+    self:Draggable(self.MainWindow, self.TitleBar)
+end
+
+function Kurai_Lib:SetToggleKeybind(keyCode)
+    if keyCode and keyCode.UserInputType == Enum.UserInputType.Keyboard then
+        Kurai_Lib.Settings.ToggleKey = keyCode
+    else
+        warn("[Kurai] Invalid keybind!")
+    end
+end
+
+function Kurai_Lib:Draggable(frame, handle)
+    local dragStartPos, frameStartPos
+    handle.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then
+            dragStartPos = input.Position
+            frameStartPos = frame.Position
+            input.Changed:Connect(function()
+                if input.UserInputState == Enum.UserInputState.End then
+                    dragStartPos = nil
+                end
+            end)
+        end
+    end)
+    
+    handle.InputChanged:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseMovement and dragStartPos then
+            local delta = input.Position - dragStartPos
+            frame.Position = UDim2.new(
+                frameStartPos.X.Scale, frameStartPos.X.Offset + delta.X,
+                frameStartPos.Y.Scale, frameStartPos.Y.Offset + delta.Y
+            )
+        end
+    end)
+end
+
+function Kurai_Lib:CreateTabs(tabNames)
+    self.Tabs = {}
+    self.CurrentTab = nil
+    
+    local tabButtonsContainer = Instance.new("ScrollingFrame")
+    tabButtonsContainer.Name = "TabButtons"
+    tabButtonsContainer.AutomaticCanvasSize = Enum.AutomaticSize.X
+    tabButtonsContainer.ScrollBarThickness = 0
+    tabButtonsContainer.ScrollingDirection = Enum.ScrollingDirection.X
+    tabButtonsContainer.BackgroundTransparency = 1
+    tabButtonsContainer.BorderSizePixel = 0
+    tabButtonsContainer.Size = UDim2.new(1, 0, 1, 0)
+    tabButtonsContainer.Parent = self.TabContainer
+    
+    local tabListLayout = Instance.new("UIListLayout")
+    tabListLayout.Padding = UDim.new(0, 5)
+    tabListLayout.FillDirection = Enum.FillDirection.Horizontal
+    tabListLayout.SortOrder = Enum.SortOrder.LayoutOrder
+    tabListLayout.Parent = tabButtonsContainer
+    
+    local tabPadding = Instance.new("UIPadding")
+    tabPadding.PaddingLeft = UDim.new(0, 10)
+    tabPadding.PaddingRight = UDim.new(0, 10)
+    tabPadding.Parent = tabButtonsContainer
+    
+    for i, tabName in next, tabNames do
+        local tabButton = Instance.new("TextButton")
+        tabButton.Name = tabName
+        tabButton.Text = tabName
+        tabButton.Font = Enum.Font.RobotoMono
+        tabButton.TextColor3 = Kurai_Lib.Theme.Text
+        tabButton.TextSize = 14
+        tabButton.BackgroundColor3 = Kurai_Lib.Theme.Tab
+        tabButton.Size = UDim2.new(0.23, 0, 0, 34)
+        tabButton.LayoutOrder = i
+        
+        local corner = Instance.new("UICorner")
+        corner.CornerRadius = UDim.new(0, 4)
+        corner.Parent = tabButton
+        
+        tabButton.Parent = tabButtonsContainer
+        
+        local tabContent = Instance.new("ScrollingFrame")
+        tabContent.Name = tabName.."Content"
+        tabContent.Size = UDim2.new(1, 0, 1, 0)
+        tabContent.BackgroundTransparency = 1
+        tabContent.ScrollBarThickness = 4
+        tabContent.ScrollBarImageColor3 = Kurai_Lib.Theme.Content
+        tabContent.BorderSizePixel = 0
+        tabContent.Visible = false
+        tabContent.Parent = self.ContentContainer
+        tabContent.AutomaticCanvasSize = Enum.AutomaticSize.Y
+        tabContent.CanvasSize = UDim2.new(0, 0, 0, 0)
+        
+        local contentListLayout = Instance.new("UIListLayout")
+        contentListLayout.Padding = UDim.new(0, 10)
+        contentListLayout.SortOrder = Enum.SortOrder.LayoutOrder
+        contentListLayout.Parent = tabContent
+        
+        local contentPadding = Instance.new("UIPadding")
+        contentPadding.PaddingTop = UDim.new(0, 10)
+        contentPadding.PaddingLeft = UDim.new(0, 10)
+        contentPadding.PaddingRight = UDim.new(0, 10)
+        contentPadding.PaddingBottom = UDim.new(0, 10)
+        contentPadding.Parent = tabContent
+        
+        self.Tabs[tabName] = {
+            Button = tabButton,
+            Content = tabContent,
+            Elements = {}
+        }
+        
+        tabButton.MouseButton1Click:Connect(function()
+            self:SwitchTab(tabName)
+        end)
+    end
+    
+    if #tabNames > 0 then
+        self:SwitchTab(tabNames[1])
+    end
+end
+
+function Kurai_Lib:SwitchTab(tabName)
+    if self.CurrentTab then
+        Kurai_Lib.Tween(self.CurrentTab.Button, {BackgroundColor3 = Kurai_Lib.Theme.Tab})
+        self.CurrentTab.Content.Visible = false
+    end
+    
+    self.CurrentTab = self.Tabs[tabName]
+    Kurai_Lib.Tween(self.CurrentTab.Button, {BackgroundColor3 = Kurai_Lib.Theme.TabAccent})
+    self.CurrentTab.Content.Visible = true
+end
+
+function Kurai_Lib:CreateButton(tabName, options)
+    options = options or {}
+    local tab = self.Tabs[tabName]
+    if not tab then return end
+    
+    local button = Instance.new("TextButton")
+    button.Name = options.Name or "Button"
+    button.Text = options.Text or "Button"
+    button.Font = Enum.Font.RobotoMono
+    button.TextColor3 = Kurai_Lib.Theme.Text
+    button.TextSize = 16
+    button.BackgroundColor3 = Kurai_Lib.Theme.Tab
+    button.Size = UDim2.new(1, -20, 0, 35)
+    button.LayoutOrder = #tab.Elements + 1
+    button.Parent = tab.Content
+    
+    local corner = Instance.new("UICorner")
+    corner.CornerRadius = UDim.new(0, 3)
+    corner.Parent = button
+    
+    button.MouseEnter:Connect(function()
+        Kurai_Lib.Tween(button, {BackgroundColor3 = Kurai_Lib.Theme.Accent})
+    end)
+    
+    button.MouseLeave:Connect(function()
+        Kurai_Lib.Tween(button, {BackgroundColor3 = Kurai_Lib.Theme.Tab})
+    end)
+    
+    button.MouseButton1Click:Connect(function()
+        Kurai_Lib.RippleEffect(button)
+        if options.Callback then
+            options.Callback()
+        end
+    end)
+    
+    table.insert(tab.Elements, button)
+    return button
+end
+
+function Kurai_Lib:CreateLabel(tabName, options)
+    options = options or {}
+    local tab = self.Tabs[tabName]
+    if not tab then return end
+    
+    local label = Instance.new("TextLabel")
+    label.Name = options.Name or "Label"
+    label.Text = options.Text or ""
+    label.Font = Enum.Font.RobotoMono
+    label.TextColor3 = Kurai_Lib.Theme.Text
+    label.TextSize = 16
+    label.TextXAlignment = options.Alignment or Enum.TextXAlignment.Left
+    label.TextYAlignment = Enum.TextYAlignment.Top
+    label.BackgroundTransparency = 1
+    label.Size = UDim2.new(1, -20, 0, 18)
+    label.LayoutOrder = #tab.Elements + 1
+    label.Parent = tab.Content
+    
+    table.insert(tab.Elements, label)
+    return label
+end
+
+function Kurai_Lib:CreateSplitter(tabName, options)
+    options = options or {}
+    local tab = self.Tabs[tabName]
+    if not tab then return end
+    
+    local splitter = Instance.new("Frame")
+    splitter.Name = options.Name or "Splitter"
+    splitter.BackgroundColor3 = Kurai_Lib.Theme.Accent
+    splitter.BorderSizePixel = 0
+    splitter.Size = UDim2.new(1, 0, 0, 1)
+    splitter.LayoutOrder = #tab.Elements + 1
+    splitter.Parent = tab.Content
+    
+    table.insert(tab.Elements, splitter)
+    return {
+        SetColor = function(color)
+            Kurai_Lib.Tween(splitter, {BackgroundColor3 = color})
+        end,
+        GetColor = function()
+            return splitter.BackgroundColor3
+        end
+    }
+end
+
+function Kurai_Lib:CreateSlider(tabName, options)
+    options = options or {}
+    local tab = self.Tabs[tabName]
+    if not tab then return end
+    
+    local slider = Instance.new("Frame")
+    slider.Name = options.Name or "Slider"
+    slider.BackgroundTransparency = 1
+    slider.Size = UDim2.new(1, 0, 0, 50)
+    slider.LayoutOrder = #tab.Elements + 1
+    slider.Parent = tab.Content
+    
+    local label = Instance.new("TextLabel")
+    label.Name = "Label"
+    label.Text = options.Text or "Slider"
+    label.Font = Enum.Font.RobotoMono
+    label.TextColor3 = Kurai_Lib.Theme.Text
+    label.TextSize = 16
+    label.TextXAlignment = Enum.TextXAlignment.Left
+    label.BackgroundTransparency = 1
+    label.Size = UDim2.new(1, 0, 0, 16)
+    label.Parent = slider
+    
+    local labelPadding = Instance.new("UIPadding")
+    labelPadding.PaddingLeft = UDim.new(0, 2)
+    labelPadding.Parent = label
+    
+    local valueLabel = Instance.new("TextLabel")
+    valueLabel.Name = "Value"
+    valueLabel.Text = options.Default and tostring(options.Default)..(options.Suffix or "") or "0"
+    valueLabel.Font = Enum.Font.RobotoMono
+    valueLabel.TextColor3 = Kurai_Lib.Theme.SubText
+    valueLabel.TextSize = 12
+    valueLabel.TextXAlignment = Enum.TextXAlignment.Right
+    valueLabel.BackgroundTransparency = 1
+    valueLabel.Position = UDim2.new(0, 0, 0, 16)
+    valueLabel.Size = UDim2.new(1, 0, 0, 16)
+    valueLabel.Parent = slider
+    
+    local valuePadding = Instance.new("UIPadding")
+    valuePadding.PaddingLeft = UDim.new(0, 2)
+    valuePadding.Parent = valueLabel
+    
+    local track = Instance.new("Frame")
+    track.Name = "Track"
+    track.BackgroundColor3 = Kurai_Lib.Theme.Content
+    track.BorderSizePixel = 0
+    track.Position = UDim2.new(0, 0, 0, 36)
+    track.Size = UDim2.new(1, 0, 0, 4)
+    track.Parent = slider
+    
+    local trackCorner = Instance.new("UICorner")
+    trackCorner.CornerRadius = UDim.new(1, 0)
+    trackCorner.Parent = track
+    
+    local fill = Instance.new("Frame")
+    fill.Name = "Fill"
+    fill.BackgroundColor3 = Kurai_Lib.Theme.Accent
+    fill.BorderSizePixel = 0
+    fill.Size = UDim2.new(0, 0, 1, 0)
+    fill.Parent = track
+    
+    local fillCorner = Instance.new("UICorner")
+    fillCorner.CornerRadius = UDim.new(1, 0)
+    fillCorner.Parent = fill
+    
+    local thumb = Instance.new("Frame")
+    thumb.Name = "Thumb"
+    thumb.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+    thumb.BorderSizePixel = 0
+    thumb.Position = UDim2.new(0, 0, 0.5, -6)
+    thumb.Size = UDim2.new(0, 12, 0, 12)
+    thumb.Parent = track
+    
+    local thumbCorner = Instance.new("UICorner")
+    thumbCorner.CornerRadius = UDim.new(1, 0)
+    thumbCorner.Parent = thumb
+    
+    local min = options.Min or 0
+    local max = options.Max or 100
+    local increment = options.Increment or 1
+    local defaultValue = math.clamp(options.Default or min, min, max)
+    local suffix = options.Suffix or ""
+    
+    self.Flags = self.Flags or {}
+    self.Flags[options.Flag or options.Name or "Slider"] = defaultValue
+    
+    local value = defaultValue
+    local sliding = false
+    
+    local function updateSlider(percent)
+        percent = math.clamp(percent, 0, 1)
+        value = math.floor(min + (max - min) * percent / increment) * increment
+        value = math.clamp(value, min, max)
+        
+        local displayValue = options.Precise and string.format("%.2f", value) or tostring(value)
+        valueLabel.Text = displayValue..suffix
+        
+        fill.Size = UDim2.new(percent, 0, 1, 0)
+        thumb.Position = UDim2.new(percent, -6, 0.5, -6)
+        
+        self.Flags[options.Flag or options.Name or "Slider"] = value
+        if options.Callback then
+            options.Callback(value)
+        end
+    end
+    
+    updateSlider((defaultValue - min) / (max - min))
+    
+    local function updateValueFromInput(input)
+        local absoluteX = input.Position.X - track.AbsolutePosition.X
+        local percent = math.clamp(absoluteX / track.AbsoluteSize.X, 0, 1)
+        updateSlider(percent)
+    end
+    
+    track.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then
+            sliding = true
+            updateValueFromInput(input)
+        end
+    end)
+    
+    track.InputEnded:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then
+            sliding = false
+        end
+    end)
+    
+    UserInputService.InputChanged:Connect(function(input)
+        if sliding and input.UserInputType == Enum.UserInputType.MouseMovement then
+            updateValueFromInput(input)
+        end
+    end)
+    
+    table.insert(tab.Elements, slider)
+    
+    return {
+        Set = function(newValue)
+            newValue = math.clamp(newValue, min, max)
+            updateSlider((newValue - min) / (max - min))
+        end,
+        Get = function()
+            return value
+        end
+    }
+end
+
+function Kurai_Lib:CreateToggle(tabName, options)
+    options = options or {}
+    local tab = self.Tabs[tabName]
+    if not tab then return end
+    
+    local toggle = Instance.new("Frame")
+    toggle.Name = options.Name or "Toggle"
+    toggle.BackgroundTransparency = 1
+    toggle.Size = UDim2.new(1, 0, 0, 24)
+    toggle.LayoutOrder = #tab.Elements + 1
+    toggle.Parent = tab.Content
+    
+    local label = Instance.new("TextLabel")
+    label.Name = "Label"
+    label.Text = options.Text or "Toggle"
+    label.Font = Enum.Font.RobotoMono
+    label.TextColor3 = Kurai_Lib.Theme.Text
+    label.TextSize = 16
+    label.TextXAlignment = Enum.TextXAlignment.Left
+    label.BackgroundTransparency = 1
+    label.Size = UDim2.new(1, -40, 1, 0)
+    label.Parent = toggle
+    
+    local padding = Instance.new("UIPadding")
+    padding.PaddingLeft = UDim.new(0, 2)
+    padding.Parent = label
+    
+    local toggleButton = Instance.new("TextButton")
+    toggleButton.Name = "ToggleButton"
+    toggleButton.Text = ""
+    toggleButton.AnchorPoint = Vector2.new(1, 0.5)
+    toggleButton.BackgroundColor3 = Kurai_Lib.Theme.Tab
+    toggleButton.Position = UDim2.new(1, 0, 0.5, 0)
+    toggleButton.Size = UDim2.new(0, 36, 0, 18)
+    toggleButton.Parent = toggle
+    
+    local buttonCorner = Instance.new("UICorner")
+    buttonCorner.CornerRadius = UDim.new(1, 0)
+    buttonCorner.Parent = toggleButton
+    
+    local dot = Instance.new("Frame")
+    dot.Name = "Dot"
+    dot.AnchorPoint = Vector2.new(0, 0.5)
+    dot.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+    dot.Position = UDim2.new(0, 2, 0.5, 0)
+    dot.Size = UDim2.new(0, 16, 0, 16)
+    dot.Parent = toggleButton
+    
+    local dotCorner = Instance.new("UICorner")
+    dotCorner.CornerRadius = UDim.new(1, 0)
+    dotCorner.Parent = dot
+    
+    local state = options.Default or false
+    self.Flags = self.Flags or {}
+    self.Flags[options.Flag or options.Name or "Toggle"] = state
+    
+    local function updateToggle()
+        if state then
+            Kurai_Lib.Tween(toggleButton, {BackgroundColor3 = Kurai_Lib.Theme.Accent})
+            Kurai_Lib.Tween(dot, {Position = UDim2.new(1, -18, 0.5, 0)})
+        else
+            Kurai_Lib.Tween(toggleButton, {BackgroundColor3 = Kurai_Lib.Theme.Tab})
+            Kurai_Lib.Tween(dot, {Position = UDim2.new(0, 2, 0.5, 0)})
+        end
+    end
+    
+    updateToggle()
+    
+    toggleButton.MouseButton1Click:Connect(function()
+        state = not state
+        self.Flags[options.Flag or options.Name or "Toggle"] = state
+        updateToggle()
+        
+        if options.Callback then
+            options.Callback(state)
+        end
+    end)
+    
+    table.insert(tab.Elements, toggle)
+    return {
+        Set = function(value)
+            state = value
+            self.Flags[options.Flag or options.Name or "Toggle"] = state
+            updateToggle()
+        end,
+        Get = function()
+            return state
+        end
+    }
+end
+
+function Kurai_Lib.Rainbow(element, speed)
+    speed = speed or 0.5
+    local hue = 0
+    
+    coroutine.wrap(function()
+        while element and element.Parent do
+            hue = (hue + 0.01) % 1
+            local color = Color3.fromHSV(hue, 1, 1)
+            
+            local property = ({
+                ["Frame"] = "BackgroundColor3",
+                ["TextLabel"] = "TextColor3",
+                ["TextButton"] = "TextColor3",
+                ["TextBox"] = "TextColor3",
+                ["ImageLabel"] = "ImageColor3",
+                ["ImageButton"] = "ImageColor3",
+                ["UIStroke"] = "Color"
+            })[element.ClassName] or "BackgroundColor3"
+            
+            if element[property] ~= nil then
+                Kurai_Lib.Tween(element, {[property] = color}, speed)
+            end
+            
+            task.wait(speed)
+        end
+    end)()
+end
+
+return Kurai_Lib
