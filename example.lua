@@ -9,12 +9,12 @@ local ui = kurai.new({
     Tabs = {"Rage", "Legit", "Visuals", "Misc", "Configs"}
 })
 
-ui:CreateLabel("Rage", {
+ui:CreateLabel("Rage", { -- [ "Rage" is the tab name. ]
     Name = "RageLabel",
     Text = "Rage Options",
     Alignment = Enum.TextXAlignment.Left
 })
-ui:CreateSplitter("Rage")
+ui:CreateSplitter("Rage") -- [ Notice how we don't have to declare redundant variables every time? ]
 
 ui:CreateToggle("Rage", {
     Name = "Aimbot",
@@ -22,7 +22,7 @@ ui:CreateToggle("Rage", {
     Default = false,
     Flag = "AimbotEnabled",
     Callback = function(state)
-        kurai:Notify("Aimbot", "Aimbot is now " .. (state and "enabled" or "disabled"), 3, state and "success" or "warn")
+        ui:Notify("Aimbot", "Aimbot is now " .. (state and "enabled" or "disabled"), 3, state and "success" or "warn")
     end
 })
 ui:CreateToggle("Rage", {
@@ -31,7 +31,7 @@ ui:CreateToggle("Rage", {
     Default = false,
     Flag = "AutoShootEnabled",
     Callback = function(state)
-        kurai:Notify("Auto Shoot", "Auto Shoot is now " .. (state and "enabled" or "disabled"), 3, state and "success" or "warn")
+        ui:Notify("Auto Shoot", "Auto Shoot is now " .. (state and "enabled" or "disabled"), 3, state and "success" or "warn")
     end
 })
 ui:CreateToggle("Rage", {
@@ -40,7 +40,7 @@ ui:CreateToggle("Rage", {
     Default = false,
     Flag = "AutoScopeEnabled",
     Callback = function(state)
-        kurai:Notify("Auto Scope", "Auto Scope is now " .. (state and "enabled" or "disabled"), 3, state and "success" or "warn")
+        ui:Notify("Auto Scope", "Auto Scope is now " .. (state and "enabled" or "disabled"), 3, state and "success" or "warn")
     end
 })
 ui:CreateToggle("Rage", {
@@ -49,7 +49,7 @@ ui:CreateToggle("Rage", {
     Default = false,
     Flag = "AntiAimEnabled",
     Callback = function(state)
-        kurai:Notify("Anti Aim", "Anti Aim is now " .. (state and "enabled" or "disabled"), 3, state and "success" or "warn")
+        ui:Notify("Anti Aim", "Anti Aim is now " .. (state and "enabled" or "disabled"), 3, state and "success" or "warn")
     end
 })
 ui:CreateToggle("Rage", {
@@ -58,7 +58,7 @@ ui:CreateToggle("Rage", {
     Default = false,
     Flag = "ResolverEnabled",
     Callback = function(state)
-        kurai:Notify("Resolver", "Resolver is now " .. (state and "enabled" or "disabled"), 3, state and "success" or "warn")
+        ui:Notify("Resolver", "Resolver is now " .. (state and "enabled" or "disabled"), 3, state and "success" or "warn")
     end
 })
 ui:CreateToggle("Rage", {
@@ -67,7 +67,7 @@ ui:CreateToggle("Rage", {
     Default = false,
     Flag = "FlyEnabled",
     Callback = function(state)
-        kurai:Notify("Fly", "Fly is now " .. (state and "enabled" or "disabled"), 3, state and "success" or "warn")
+        ui:Notify("Fly", "Fly is now " .. (state and "enabled" or "disabled"), 3, state and "success" or "warn")
     end
 })
 ui:CreateSlider("Rage", {
@@ -111,7 +111,7 @@ ui:CreateToggle("Legit", {
     Default = false,
     Flag = "TriggerbotEnabled",
     Callback = function(state)
-        kurai:Notify("Triggerbot", "Triggerbot is now " .. (state and "enabled" or "disabled"), 3, state and "success" or "warn")
+        ui:Notify("Triggerbot", "Triggerbot is now " .. (state and "enabled" or "disabled"), 3, state and "success" or "warn")
     end
 })
 ui:CreateSlider("Legit", {
@@ -134,7 +134,7 @@ ui:CreateToggle("Legit", {
     Default = false,
     Flag = "SilentAimEnabled",
     Callback = function(state)
-        kurai:Notify("Silent Aim", "Silent Aim is now " .. (state and "enabled" or "disabled"), 3, state and "success" or "warn")
+        ui:Notify("Silent Aim", "Silent Aim is now " .. (state and "enabled" or "disabled"), 3, state and "success" or "warn")
     end
 })
 ui:CreateSlider("Legit", {
@@ -170,7 +170,7 @@ ui:CreateToggle("Legit", {
     Default = false,
     Flag = "RecoilCntrlEnabled",
     Callback = function(state)
-        kurai:Notify("Recoil Control", "Recoil Control is now " .. (state and "enabled" or "disabled"), 3, state and "success" or "warn")
+        ui:Notify("Recoil Control", "Recoil Control is now " .. (state and "enabled" or "disabled"), 3, state and "success" or "warn")
     end
 })
 ui:CreateSlider("Legit", {
@@ -214,7 +214,7 @@ ui:CreateToggle("Visuals", {
     Default = false,
     Flag = "ESPToggle",
     Callback = function(state)
-        kurai:Notify("ESP", "ESP is now " .. (state and "enabled" or "disabled"), 3, state and "success" or "warn")
+        ui:Notify("ESP", "ESP is now " .. (state and "enabled" or "disabled"), 3, state and "success" or "warn")
     end
 })
 ui:CreateToggle("Visuals", {
@@ -223,7 +223,7 @@ ui:CreateToggle("Visuals", {
     Default = false,
     Flag = "BoxESPToggle",
     Callback = function(state)
-        kurai:Notify("Box ESP", "Box ESP is now " .. (state and "enabled" or "disabled"), 3, state and "success" or "warn")
+        ui:Notify("Box ESP", "Box ESP is now " .. (state and "enabled" or "disabled"), 3, state and "success" or "warn")
     end
 })
 ui:CreateToggle("Visuals", {
@@ -232,7 +232,7 @@ ui:CreateToggle("Visuals", {
     Default = false,
     Flag = "NameESPToggle",
     Callback = function(state)
-        kurai:Notify("Name ESP", "Name ESP is now " .. (state and "enabled" or "disabled"), 3, state and "success" or "warn")
+        ui:Notify("Name ESP", "Name ESP is now " .. (state and "enabled" or "disabled"), 3, state and "success" or "warn")
     end
 })
 ui:CreateToggle("Visuals", {
@@ -241,7 +241,7 @@ ui:CreateToggle("Visuals", {
     Default = false,
     Flag = "DistanceESPToggle",
     Callback = function(state)
-        kurai:Notify("Distance ESP", "Distance ESP is now " .. (state and "enabled" or "disabled"), 3, state and "success" or "warn")
+        ui:Notify("Distance ESP", "Distance ESP is now " .. (state and "enabled" or "disabled"), 3, state and "success" or "warn")
     end
 })
 ui:CreateToggle("Visuals", {
@@ -250,7 +250,7 @@ ui:CreateToggle("Visuals", {
     Default = false,
     Flag = "HealthESPToggle",
     Callback = function(state)
-        kurai:Notify("Health ESP", "Health ESP is now " .. (state and "enabled" or "disabled"), 3, state and "success" or "warn")
+        ui:Notify("Health ESP", "Health ESP is now " .. (state and "enabled" or "disabled"), 3, state and "success" or "warn")
     end
 })
 ui:CreateToggle("Visuals", {
@@ -259,7 +259,7 @@ ui:CreateToggle("Visuals", {
     Default = false,
     Flag = "TeamCheckToggle",
     Callback = function(state)
-        kurai:Notify("Team Check", "Team Check is now " .. (state and "enabled" or "disabled"), 3, state and "success" or "warn")
+        ui:Notify("Team Check", "Team Check is now " .. (state and "enabled" or "disabled"), 3, state and "success" or "warn")
     end
 })
 ui:CreateToggle("Visuals", {
@@ -268,7 +268,7 @@ ui:CreateToggle("Visuals", {
     Default = false,
     Flag = "ChamsToggle",
     Callback = function(state)
-        kurai:Notify("Chams", "Chams are now " .. (state and "enabled" or "disabled"), 3, state and "success" or "warn")
+        ui:Notify("Chams", "Chams are now " .. (state and "enabled" or "disabled"), 3, state and "success" or "warn")
     end
 })
 
@@ -286,7 +286,7 @@ ui:CreateToggle("Misc", {
     Default = false,
     Flag = "ThirdPToggle",
     Callback = function(state)
-        kurai:Notify("Third Person", "Third Person is now " .. (state and "enabled" or "disabled"), 3, state and "success" or "warn")
+        ui:Notify("Third Person", "Third Person is now " .. (state and "enabled" or "disabled"), 3, state and "success" or "warn")
     end
 })
 ui:CreateSlider("Misc", {
@@ -308,7 +308,7 @@ ui:CreateToggle("Misc", {
     Default = false,
     Flag = "NoClipToggle",
     Callback = function(state)
-        kurai:Notify("No Clip", "No Clip is now " .. (state and "enabled" or "disabled"), 3, state and "success" or "warn")
+        ui:Notify("No Clip", "No Clip is now " .. (state and "enabled" or "disabled"), 3, state and "success" or "warn")
     end
 })
 ui:CreateToggle("Misc", {
@@ -317,7 +317,7 @@ ui:CreateToggle("Misc", {
     Default = false,
     Flag = "BhopToggle",
     Callback = function(state)
-        kurai:Notify("Bunny Hop", "Bunny Hop is now " .. (state and "enabled" or "disabled"), 3, state and "success" or "warn")
+        ui:Notify("Bunny Hop", "Bunny Hop is now " .. (state and "enabled" or "disabled"), 3, state and "success" or "warn")
     end
 })
 ui:CreateToggle("Misc", {
@@ -326,7 +326,7 @@ ui:CreateToggle("Misc", {
     Default = false,
     Flag = "AutoStrafeToggle",
     Callback = function(state)
-        kurai:Notify("Auto Strafe", "Auto Strafe is now " .. (state and "enabled" or "disabled"), 3, state and "success" or "warn")
+        ui:Notify("Auto Strafe", "Auto Strafe is now " .. (state and "enabled" or "disabled"), 3, state and "success" or "warn")
     end
 })
 
@@ -342,14 +342,14 @@ ui:CreateButton("Configs", {
     Name = "SaveConfig",
     Text = "Save Config",
     Callback = function()
-        kurai:Notify("Config", "Config saved successfully!", 3, "success")
+        ui:Notify("Config", "Config saved successfully!", 3, "success")
     end
 })
 ui:CreateButton("Configs", {
     Name = "LoadConfig",
     Text = "Load Config",
     Callback = function()
-        kurai:Notify("Config", "Config loaded successfully!", 3, "success")
+        ui:Notify("Config", "Config loaded successfully!", 3, "success")
     end
 })
 
@@ -359,4 +359,4 @@ ui:CreateLabel("Configs", {
     Alignment = Enum.TextXAlignment.Left
 })
 
-kurai:Notify("Kurai", "Kurai UI loaded successfully.", 3)
+ui:Notify("Kurai", "Kurai UI loaded successfully.", 3)
