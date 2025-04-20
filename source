@@ -449,7 +449,7 @@ function pixel_Lib:_internal_createmainwindow(options)
     self.GameTitle.Parent = self.TitleBar
 
     self.LogoIcon = Instance.new("ImageLabel")
-    self.LogoIcon.Image = "rbxassetid://108502703403650"
+    self.LogoIcon.Image = "rbxassetid://70922838511318"
     self.LogoIcon.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
     self.LogoIcon.BackgroundTransparency = 1
     self.LogoIcon.BorderColor3 = Color3.fromRGB(0, 0, 0)
