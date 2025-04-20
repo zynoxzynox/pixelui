@@ -2,25 +2,27 @@
 
 > 暗い kurai (pronounced "koo-rye") is a sleek ui library focused on simplicity, modern design, and csgo inspired aesthetics.  
 > dropdowns, inputs, keybinds and more added later.
+> credits to focat
+> edited by zynox
 
 ## example 暗い
 ```lua
 loadstring(
-    game:HttpGetAsync 'https://raw.githubusercontent.com/focat69/kurai/refs/heads/main/example.lua'
+    game:HttpGetAsync 'https://raw.githubusercontent.com/zynoxzynox/pixelui/refs/heads/main/source'
 )()
 ```
 
 ## installation 暗い
 ```lua
 local lib = loadstring(
-    game:HttpGetAsync `https://raw.githubusercontent.com/focat69/kurai/refs/heads/main/source?t={tostring(tick())}`
+    game:HttpGetAsync `https://raw.githubusercontent.com/zynoxzynox/pixelui/refs/heads/main/source?t={tostring(tick())}`
 )()
 ```
 
 ## initialization 暗い
 to create a new instance:
 ```lua
-local kurai = lib.new({
+local pixel = lib.new({
     Name = "screenguiname",             -- (optional) name for the screengui
     GameName = "Phantom Forces",        -- displayed in the title bar
     ScriptHubName = "JewWare Premium",  -- displayed under the game name
@@ -30,7 +32,7 @@ local kurai = lib.new({
 to toggle ui, press `RCTRL`.  
  you can always change this before initialization.
 ```lua
-kurai:SetKeybind(
+pixel:SetKeybind(
     KeyCode: Enum.KeyCode
 ) -- default is right ctrl 暗い
 ```
@@ -41,7 +43,7 @@ kurai:SetKeybind(
 creates a clickable button with ripple effect.
 
 ```lua
-kurai:CreateButton("TabName", {
+pixel:CreateButton("TabName", {
     Name = "MyButton",           -- (optional) element name
     Text = "Click Me",           -- button text
     Callback = function()        -- function to execute when clicked
@@ -54,7 +56,7 @@ kurai:CreateButton("TabName", {
 creates a text label.
 
 ```lua
-kurai:CreateLabel("TabName", {
+pixel:CreateLabel("TabName", {
     Name = "MyLabel",            -- (optional) element name
     Text = "Information Text",   -- label text
     Alignment = Enum.TextXAlignment.Left  -- text alignment (Left/Center/Right)
@@ -65,7 +67,7 @@ kurai:CreateLabel("TabName", {
 creates a horizontal divider line.
 
 ```lua
-local splitter = kurai:CreateSplitter("TabName", {
+local splitter = pixel:CreateSplitter("TabName", {
     Name = "MySplitter"          -- (optional) element name
 })
 
@@ -78,7 +80,7 @@ local currentColor = splitter:GetColor() -- get current color
 creates an adjustable slider input.
 
 ```lua
-local slider = kurai:CreateSlider("TabName", {
+local slider = pixel:CreateSlider("TabName", {
     Name = "MySlider",           -- (optional) element name
     Text = "Volume",             -- label text
     Min = 0,                     -- minimum value
@@ -102,7 +104,7 @@ local value = slider:Get()       -- get current value
 creates a switch toggle.
 
 ```lua
-local toggle = kurai:CreateToggle("TabName", {
+local toggle = pixel:CreateToggle("TabName", {
     Name = "MyToggle",           -- (optional) element name
     Text = "Enable Feature",     -- label text
     Default = false,             -- starting state
@@ -141,7 +143,7 @@ ui:Notify("Your Title", "This is an info message.", 5) -- default type is "info"
 applies a tween animation to an object.
 
 ```lua
-kurai.Tween(object, properties, duration, easingStyle, easingDirection)
+pixel.Tween(object, properties, duration, easingStyle, easingDirection)
 -- example:
 kurai.Tween(frame, {Size = UDim2.new(0, 200, 0, 50)}, 0.5, Enum.EasingStyle.Quint, Enum.EasingDirection.Out)
 ```
@@ -150,7 +152,7 @@ kurai.Tween(frame, {Size = UDim2.new(0, 200, 0, 50)}, 0.5, Enum.EasingStyle.Quin
 applies a rainbow color animation to an element.
 
 ```lua
-kurai.Rainbow(element, speed)
+pixek.Rainbow(element, speed)
 -- example:
 kurai.Rainbow(frame, 0.3)  -- speed is optional (default 0.5)
 ```
