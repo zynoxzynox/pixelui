@@ -1,5 +1,5 @@
 local kurai = loadstring(
-    game:HttpGetAsync(`https://raw.githubusercontent.com/focat69/kurai/refs/heads/main/source?t={tostring(tick())}`)
+    game:HttpGetAsync(`https://raw.githubusercontent.com/zynoxzynox/pixelui/refs/heads/main/source?t={tostring(tick())}`)
 )()
 
 local ui = kurai.new({
