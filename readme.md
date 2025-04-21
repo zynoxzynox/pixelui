@@ -15,7 +15,7 @@ loadstring(
 ## installation 暗い
 ```lua
 local lib = loadstring(
-    game:HttpGetAsync `https://raw.githubusercontent.com/zynoxzynox/pixelui/refs/heads/main/source?t={tostring(tick())}`
+    game:HttpGetAsync(`https://raw.githubusercontent.com/zynoxzynox/pixelui/refs/heads/main/source?t={tostring(tick())}`)
 )()
 ```
 
